@@ -1,0 +1,30 @@
+Spatial Data Science with R - one-day course, NYC, Oct 17 2019
+
+Instructor: Edzer Pebesma, https://twitter.com/edzerpebesma https://www.uni-muenster.de/Geoinformatics/institute/staff/index.php/119/Edzer_Pebesma
+
+Purpose: Getting familiar with the different types of spatial data, their handling and representation in R, typical operations on them, and the modeling of spatial data.
+
+Outline of the day:
+Morning: Basics of spatial data, handling spatial data in R
+Spaces, how we measure space, Earth-bound data, coordinate reference systems
+Points, lines, polygons, tesselations, rasters
+Types of spatial data: objects, fields, aggregations
+Standards for spatial data: simple features, coverages
+R spatial: handling vector data with sf
+R spatial: sf and tidyverse
+R spatial: handling spatial data cubes with stars 
+Combining different spatial datasets
+
+Afternoon: Analysing and modeling spatial data in R
+Point pattern data: modeling with spatstat
+Geostatistical data: interpolation with gstat
+Lattice (areal) data: modeling with spdep
+If time permits: up- and downscaling spatial data
+
+
+Packages used: sf, stars, sp, rgdal, rgeos, raster, gstat, spdep, spatstat, tidyverse
+
+Prerequisites: Familiarity with R, curiosity for the story behind maps
+
+Bio: Edzer Pebesma is an R user and developer for  20 years, author and maintainer of a number of packages for handling spatial data in R including sf, sp and gstat, and one of the authors of “Applied Spatial Data Analysis with R, second edition (2013)”. He is an ordinary member of the R Foundation, and one of the editors for the Journal of Statistical Software. Edzer is full professor at the Institute for Geoinformatics, University of Muenster, Germany.
+
