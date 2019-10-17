@@ -50,6 +50,57 @@ lines(s, p1$fit+2*p1$se.fit, lty=2)
 par(opar)
 
 
+## ----eval=FALSE----------------------------------------------------------
+## remotes::install_github("r-spatial/stars")
+
+
+## ------------------------------------------------------------------------
+data(air, package = "spacetime") # requires spacetime to be installed
+crs = 32632 # UTM zone 32N
+DE_NUTS1 %>% st_as_sfc() %>% st_transform(crs) -> de # DE_NUTS1 is part of the "air" datasets
+library(stars)
+grd = st_as_stars(de)
+grd[[1]][grd[[1]] == 0] = NA
+plot(grd, axes = TRUE)
+
+
+## ------------------------------------------------------------------------
+library(gstat)
+sel = 1800:2300
+a = air[,sel]
+dim(a)
+library(units)
+(a.st = st_as_stars(list(PM10 = set_units(air[,sel], ppm))))
+a.st %>% 
+  st_set_dimensions(1, values = st_as_sfc(stations)) %>% 
+  st_set_dimensions(2, values = dates[sel]) %>% 
+  st_transform(crs) -> a.st2
+st_apply(a.st2, "sfc", mean, na.rm = TRUE) %>% 
+	st_as_sf() %>%
+	na.omit()  -> a.means
+v = variogram(mean ~ 1, a.means)
+v.fit = fit.variogram(v, vgm(10, "Exp", 1e5, 10))
+plot(v, v.fit)
+
+
+## ------------------------------------------------------------------------
+int <- krige(mean~1, a.means, grd, v.fit)
+plot(int, reset = FALSE, key.pos = 4, breaks = "pretty")
+plot(de, col = NA, border = 'red', add = TRUE)
+plot(st_geometry(a.means), col = 'green', add = TRUE, pch = 16)
+
+
+## ------------------------------------------------------------------------
+library(viridis)
+library(ggplot2)
+g = ggplot() + coord_equal() +
+    scale_fill_viridis() +
+    theme_void() +
+    scale_x_discrete(expand=c(0,0)) +
+    scale_y_discrete(expand=c(0,0))
+g + geom_stars(data = int) + geom_sf(data = de, fill = NA) + geom_sf(data = a.means)
+
+
 ## ---- echo=TRUE, results='hide', message=FALSE---------------------------
 suppressPackageStartupMessages(library(spdep))
 nb_tri <- tri2nb(crds)
