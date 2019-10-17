@@ -154,7 +154,10 @@ We can interpolate these spatial time series, when we have a target grid, e.g.
 created by
 
 ```{r}
+data(air, package = "spacetime") # requires spacetime to be installed
+crs = 32632 # UTM zone 32N
 DE_NUTS1 %>% st_as_sfc() %>% st_transform(crs) -> de # DE_NUTS1 is part of the "air" datasets
+library(stars)
 grd = st_as_stars(de)
 grd[[1]][grd[[1]] == 0] = NA
 plot(grd, axes = TRUE)
@@ -164,6 +167,15 @@ We will work with temporal means, rather than full space/time variability, and f
 a variogram to the temporal mean PM10 values:
 ```{r}
 library(gstat)
+sel = 1800:2300
+a = air[,sel]
+dim(a)
+library(units)
+(a.st = st_as_stars(list(PM10 = set_units(air[,sel], ppm))))
+a.st %>% 
+  st_set_dimensions(1, values = st_as_sfc(stations)) %>% 
+  st_set_dimensions(2, values = dates[sel]) %>% 
+  st_transform(crs) -> a.st2
 st_apply(a.st2, "sfc", mean, na.rm = TRUE) %>% 
 	st_as_sf() %>%
 	na.omit()  -> a.means
@@ -183,6 +195,7 @@ plot(st_geometry(a.means), col = 'green', add = TRUE, pch = 16)
 A `ggplot2` plot of the same is obtained by
 ```{r}
 library(viridis)
+library(ggplot2)
 g = ggplot() + coord_equal() +
     scale_fill_viridis() +
     theme_void() +
