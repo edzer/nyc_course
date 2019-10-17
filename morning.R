@@ -2,6 +2,31 @@
 knitr::opts_chunk$set(echo = TRUE)
 
 
+## ----fig.height=3--------------------------------------------------------
+set.seed(10)
+xy = matrix(runif(50), ncol = 2)
+library(sf)
+grd = st_make_grid(st_as_sfc("POLYGON((0 0,1 0,1 1,0 1,0 0))"), n = c(3,3))
+pts = st_as_sf(data.frame(x = xy[,1], y = xy[,2]), coords = c("x", "y"))
+o = st_sf(n = lengths(st_contains(grd, pts)), geom = grd)
+plot(o, reset = FALSE, pal = hcl.colors(4, "YlOrRd", rev = TRUE))
+plot(pts, col = 'green', add = TRUE, pch = 16)
+
+
+## ----fig.height=3, fig.width=10------------------------------------------
+library(MASS)
+par(mfrow = c(1, 3))
+m = kde2d(xy[,1], xy[,2])
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+m = kde2d(xy[,1], xy[,2], h = c(1,1))
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+m = kde2d(xy[,1], xy[,2], h = c(.3, .3))
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+
+
 ## ----echo=FALSE----------------------------------------------------------
 knitr::include_graphics('landuse.png')
 
@@ -189,44 +214,6 @@ knitr::include_graphics('cube3.png')
 
 ## ----out.width='100%'----------------------------------------------------
 knitr::include_graphics('cube4.png')
-
-
-## ----eval=FALSE----------------------------------------------------------
-## remotes::install_github("r-spatial/stars")
-
-
-## ------------------------------------------------------------------------
-DE_NUTS1 %>% st_as_sfc() %>% st_transform(crs) -> de # DE_NUTS1 is part of the "air" datasets
-grd = st_as_stars(de)
-grd[[1]][grd[[1]] == 0] = NA
-plot(grd, axes = TRUE)
-
-
-## ------------------------------------------------------------------------
-library(gstat)
-st_apply(a.st2, "sfc", mean, na.rm = TRUE) %>% 
-	st_as_sf() %>%
-	na.omit()  -> a.means
-v = variogram(mean ~ 1, a.means)
-v.fit = fit.variogram(v, vgm(10, "Exp", 1e5, 10))
-plot(v, v.fit)
-
-
-## ------------------------------------------------------------------------
-int <- krige(mean~1, a.means, grd, v.fit)
-plot(int, reset = FALSE, key.pos = 4, breaks = "pretty")
-plot(de, col = NA, border = 'red', add = TRUE)
-plot(st_geometry(a.means), col = 'green', add = TRUE, pch = 16)
-
-
-## ------------------------------------------------------------------------
-library(viridis)
-g = ggplot() + coord_equal() +
-    scale_fill_viridis() +
-    theme_void() +
-    scale_x_discrete(expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0))
-g + geom_stars(data = int) + geom_sf(data = de, fill = NA) + geom_sf(data = a.means)
 
 
 

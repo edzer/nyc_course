@@ -21,6 +21,8 @@ All the material presented here, to the extent it is original, is available unde
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### Link to this document:
+
 ## Part I (90')
 
 * A. Spatial data, simple features (20' + 10' exercises)
@@ -87,6 +89,38 @@ _over space_:
 
 * **objects** are discrete things: houses, cars, rivers, persons, which have a location and other properties
 * **fields** are continuous phenomena: temperature and pressure of air, elevation of the Earth surface; fields are essentially _functions_ mapping from two- or three-dimensional space (and possibly time) to a value.
+
+Arguably, a third class is that of _aggregations_, where values are computed as _spatial_ aggregates (e.g. mean, median, or quantiles) over an object or field variable, either by
+
+* **aggregation within disjoint areas** e.g. administrative regions, or raster cells (e.g. block counts), or
+* **convolution**, by moving an (overlapping) window/kernel over a regular grid (densities):
+
+Block counts:
+```{r fig.height=3}
+set.seed(10)
+xy = matrix(runif(50), ncol = 2)
+library(sf)
+grd = st_make_grid(st_as_sfc("POLYGON((0 0,1 0,1 1,0 1,0 0))"), n = c(3,3))
+pts = st_as_sf(data.frame(x = xy[,1], y = xy[,2]), coords = c("x", "y"))
+o = st_sf(n = lengths(st_contains(grd, pts)), geom = grd)
+plot(o, reset = FALSE, pal = hcl.colors(4, "YlOrRd", rev = TRUE))
+plot(pts, col = 'green', add = TRUE, pch = 16)
+```
+
+Densities:
+```{r fig.height=3, fig.width=10}
+library(MASS)
+par(mfrow = c(1, 3))
+m = kde2d(xy[,1], xy[,2])
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+m = kde2d(xy[,1], xy[,2], h = c(1,1))
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+m = kde2d(xy[,1], xy[,2], h = c(.3, .3))
+image(m, asp = 1)
+points(xy, col = 'green', pch = 16)
+```
 
 [OGC](https://www.opengeospatial.org/), a standardisation
 body for geospatial information, defines in its [abstract
